@@ -1,113 +1,42 @@
-<html>
-  <head>
-    <title>Syed Mortoja Hasan</title>
-    </head>
-  <body>
-<h2> Syed Mortoja Hasan (Mithun) </h2> <br>
-<h3>Jashore, Bangladesh | +8801672502929 | mortoja@email.com </h3>
-<hr>
-<b>Experience </b><hr> <br>
-<p><b>System Engineer </b><br>
-<b>Jashore City Cable Pvt. Ltd. (JCCL) </b>   |               12/2015 - Present <br>
-<b>MK Road, Jashore , Bangladesh</b> <br>
-<ul>
-<li><b>Satellite channel reception and distribution:</b> Satellite channel receiving via dish-antenna to get the video signal pass through the digital or analog system.</li>
-<li><b>Digital head-end maintenance:</b> video signal analysis,  Encoder, IRD and Quadrature Amplitude Modulation (QAM) maintenance. Serving encrypted programs to Set Top Box (STB). Program listing, frequency and bandwidth analysis and distribution, multiple CAS & SMS server maintenance.</li>
-<li>STB distribution: SetTop Box (STB) quality test, market analysis, avail STB facility to the customer end through Local Cable Operators(LCO). STB inventory and stock maintenance, distribution, warranty processing and replacement. </li>
-<li>LCO Payment management: payment of each STB analysis, commission distribution to the company and LCO/sub-LCO, LCO database creation and maintenance.</li>
-<li>Internet service providing: Broadband internet providing, customer database maintenance, Mikrotik Routers and OLT configuration and maintenance for clients, customer support.</li>
-<li>Office system management: Office activities like Inventory of office products and goods, associate with accounts management team, official email communication, preparing office documentation, presentation, client complaint handling  and troubleshooting.</li>
-<li>Software and hardware maintenance: Each computer of the company along with server and desktop computer has different configuration and software set-up for different purposes. managing and updating each computer's software and hardware maintenance.</li>
-</ul>
-</p>
-    <p>
-<b>Junior Instructor (Part Time)  </b><br>
-<b>Jessore Technical Training Center (TTC) </b>   |               02/2017 - 12/2018 <br>
-<b>Nazir Sankorpur, Jashore , Bangladesh</b> <br>
-    
-                   
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JCCL Store</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 2rem; }
+    h1 { color: #333; }
+    .post { border-bottom: 1px solid #ccc; margin-bottom: 2rem; padding-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>📝 Latest Posts from My WordPress</h1>
+  <div id="posts">Loading...</div>
 
-Assisted in developing and delivering educational content for a weekly class of 30 students, enhancing student engagement and improving test exams.
-Project management: Creating and preparing practical projects for the class.
-Class plan design: Each class needs to be planned  to cover the syllabus. Making each class effective for  the students.
-Class conduction: Conducting class with students daily practical class after theory.
-Exam monitoring: Quiz test, model test, exam conduction, monitoring and evaluation.
-      </p>
-    <p>
-Manager 
-CIVCON Tower, Jessore                   02/2015 - 08/2015
-Mujib Road, Jashore , Bangladesh
-Construction site monitoring, worker and staff maintenance, finance and construction quality evaluation.
-Accounts management, ledger maintenance, daily sheet posting.
-Material & goods purchase, stock distribution maintenance.
-Office Secretary 
-Bangladesh Computer Samity, Jashore (BCS)                   04/2011 - 02/2013
-Mike Potti, Jashore , Bangladesh
-Office management, Official activities, document processing, email communication, letter submission, communication and cooperation with computer businessmen.
-Daily reporting via email to the main office situated in Dhaka.
-Weekly meeting arrangement for the regional board of directors of BCS.
-Annual computer fair arrangement, Stall reservation, Stall decoration and planning,  Fair monitoring, Technical help and support.
-      </p>
-Trainer & IT Specialist 
-Jege Otho IT Village                   09/2010 - 03/2014
-Khorki, Jashore , Bangladesh
-Conducting training of office application, graphic design, web designing, programming and outsourcing courses.
-Internet & network management, computer network creation, maintenance and monitoring.
-Organization's website and social media network maintenance.
-Resource collection for organizations from different organizations and service providers.
-Training module and guide creation for students.
-Conduct weekly exams of theory and practical to prepare learners more attentively for the main exam.
-Short and long term skill development course module creation and implementation.
+  <script>
+    const api = 'https://store.jccl.com.bd/wp-json/wp/v2/posts?_embed&per_page=5';
 
-Languages
-Bangla
-English
-Hindi
-
-Skills
-Customer service
-Communication skills
-Time management
-Project Management
-Program Management
-Documentation review
-Leadership
-Computer literacy
-Microsoft word
-Microsoft excel
-Powerpoint
-Data Entry
-Database Administration
-Graphic Design
-Web Development
-Programming
-JavaScript
-Python
-Git
-Content Creation
-
-Education
-Jessore Technical & Management College (JTMC)                   Electrical Technology 
-06/2016
-Jashore , Bangladesh
-Exam held under Bangladesh Technical Education Board.
-West Zone Power Distribution Company (WZPDCO)                   Industrial Training 
-12/2009
-Jashore , Bangladesh
-Certified by Bangladesh Technical Eeducation Board.
-Jessore Zilla School                   Secondary School Certificate (SSC) 
-12/2006
-Jashore , Bangladesh
-Exam Held under Education Board, Jashore.
-
-Certificates
-SSC
-Diploma Enginnering
-Industrial Attachment Training and Workshop
-Youth Leadership Training and Workshop
-Computer Office Application
-Database Management
-Electrical House Wiring
-Graphic Design
+    fetch(api)
+      .then(response => response.json())
+      .then(posts => {
+        const container = document.getElementById('posts');
+        container.innerHTML = '';
+        posts.forEach(post => {
+          const div = document.createElement('div');
+          div.className = 'post';
+          div.innerHTML = `
+            <h2>${post.title.rendered}</h2>
+            <p><em>${new Date(post.date).toDateString()}</em></p>
+            <div>${post.excerpt.rendered}</div>
+            <a href="${post.link}" target="_blank">Read more</a>
+          `;
+          container.appendChild(div);
+        });
+      })
+      .catch(err => {
+        document.getElementById('posts').innerHTML = 'Failed to load posts.';
+        console.error(err);
+      });
+  </script>
 </body>
 </html>
