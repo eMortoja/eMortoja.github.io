@@ -15,21 +15,23 @@
     <iframe id="browserFrame" src="about:blank" class="w-full h-full"></iframe>
   </main>  <footer class="bg-gray-800 p-4 text-center">
     <button onclick="downloadContent()" class="bg-green-600 px-4 py-2 rounded">Download Visible Page (HTML)</button>
-  </footer>  <script>
-    function loadPage() {
-      const input = document.getElementById('addressBar').value.trim();
-      const iframe = document.getElementById('browserFrame');
+  </footer>  
+<script>
+function loadPage() {
+  const input = document.getElementById('addressBar').value.trim();
+  const iframe = document.getElementById('browserFrame');
 
-      if (!input) return;
+  if (!input) return;
 
-      let url = input;
-      if (!url.startsWith('http')) {
-        url = 'https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(input);
-      }
+  let url = input;
+  if (!url.startsWith('http')) {
+    // DuckDuckGo Lite works in iframe
+    url = 'https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(input);
+  }
 
-      iframe.src = url;
-    }
-
+  iframe.src = url;
+}
+     
     function downloadContent() {
       const iframe = document.getElementById('browserFrame');
       try {
