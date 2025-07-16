@@ -1,17 +1,44 @@
-<html>
-<head>Surf</head>
-<body>
-<form id="browseForm">
-  <input type="text" id="urlInput" placeholder="Enter URL"/>
-  <button type="submit">Go</button>
-</form>
-<iframe id="browserFrame" width="100%" height="600"></iframe>
-<script>
-document.getElementById('browseForm').onsubmit = function(e){
-  e.preventDefault();
-  var url = document.getElementById('urlInput').value;
-  document.getElementById('browserFrame').src = '/proxy?url=' + encodeURIComponent(url);
-}
-</script>
-</body>
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebLite Browser</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+  <header class="bg-gray-800 p-4 flex items-center space-x-2">
+    <input id="addressBar" type="text" placeholder="Enter URL or search..."
+      class="flex-1 px-4 py-2 rounded text-black" />
+    <button onclick="loadPage()" class="bg-blue-600 px-4 py-2 rounded">Go</button>
+  </header>  <main class="flex-1">
+    <iframe id="browserFrame" src="about:blank" class="w-full h-full"></iframe>
+  </main>  <footer class="bg-gray-800 p-4 text-center">
+    <button onclick="downloadContent()" class="bg-green-600 px-4 py-2 rounded">Download Visible Page (HTML)</button>
+  </footer>  <script>
+    function loadPage() {
+      const input = document.getElementById('addressBar').value.trim();
+      const iframe = document.getElementById('browserFrame');
+
+      if (!input) return;
+
+      let url = input;
+      if (!url.startsWith('http')) {
+        url = 'https://www.google.com/search?q=' + encodeURIComponent(input);
+      }
+
+      iframe.src = url;
+    }
+
+    function downloadContent() {
+      const iframe = document.getElementById('browserFrame');
+      try {
+        const html = iframe.contentDocument.documentElement.outerHTML;
+        const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+        saveAs(blob, "page.html");
+      } catch (e) {
+        alert("Unable to access content. CORS restriction.");
+      }
+    }
+  </script></body>
 </html>
