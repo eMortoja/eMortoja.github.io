@@ -33,9 +33,12 @@
           <div class="border border-gray-700 rounded p-3 bg-gray-900/40">
             <h3 class="font-medium text-sm">Source account</h3>
             <p class="text-xs text-gray-400 mt-1">Authenticate and list available exports.</p>
-            <button onclick="connectSource()" class="mt-2 px-3 py-1 rounded bg-blue-600 text-xs">
-              Connect source
-            </button>
+            <div class="mt-2 flex items-center gap-2">
+              <button onclick="connectSource()" class="px-3 py-1 rounded bg-blue-600 text-xs">
+                Connect source
+              </button>
+              <span id="sourceStatus" class="text-xs text-gray-400"></span>
+            </div>
           </div>
           <div class="border border-gray-700 rounded p-3 bg-gray-900/40">
             <h3 class="font-medium text-sm">Destination account</h3>
@@ -70,8 +73,26 @@
       var base = location.hostname.toLowerCase().endsWith('vercel.app')
         ? ''
         : 'https://emortoja.vercel.app';
-      window.location.href = base + '/api/google/source/auth';
+      var url = base + '/api/google/source/auth';
+      var w = 480;
+      var h = 640;
+      var left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
+      var top = window.screenY + Math.max(0, (window.outerHeight - h) / 2);
+      window.open(
+        url,
+        'google_source_connect',
+        'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes'
+      );
     }
+    window.addEventListener('message', function (event) {
+      var data = event.data || {};
+      if (data.type === 'google-source-connected') {
+        var s = document.getElementById('sourceStatus');
+        if (s) {
+          s.textContent = data.email ? 'Connected as ' + data.email : 'Source connected';
+        }
+      }
+    });
   </script>
   <script src="./nav.js"></script>
 </body>

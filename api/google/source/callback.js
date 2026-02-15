@@ -54,9 +54,12 @@ export default async function handler(req, res) {
   }
   res.statusCode = 200;
   res.setHeader('content-type', 'text/html; charset=utf-8');
-  res.end(
-    '<!doctype html><html><head><meta charset="utf-8"><title>Google source connected</title></head><body class="bg-gray-900" style="font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; padding: 2rem; background:#020617; color:#e5e7eb;"><h1 style="font-size:1.5rem; font-weight:600;">Source account connected</h1><p style="margin-top:0.5rem;">' +
-      (email ? 'Signed in as ' + email : 'Sign-in completed.') +
-      '</p><p style="margin-top:1rem;">You can close this window and return to the Tools page.</p></body></html>'
-  );
+  const safeEmail = email || '';
+  const body =
+    '<!doctype html><html><head><meta charset="utf-8"><title>Google source connected</title></head><body style="font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; padding: 1.5rem; background:#020617; color:#e5e7eb;"><h1 style="font-size:1.25rem; font-weight:600;">Source account connected</h1><p style="margin-top:0.5rem;">' +
+    (safeEmail ? 'Signed in as ' + safeEmail : 'Sign-in completed.') +
+    '</p><p style="margin-top:0.75rem; font-size:0.875rem;">You can close this window.</p><script>(function(){try{if(window.opener && !window.opener.closed){window.opener.postMessage({type:\"google-source-connected\",email:' +
+    JSON.stringify(safeEmail) +
+    '},\"*\");}}catch(e){}setTimeout(function(){window.close();},500);}());</script></body></html>';
+  res.end(body);
 }
