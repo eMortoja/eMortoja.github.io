@@ -43,9 +43,12 @@
           <div class="border border-gray-700 rounded p-3 bg-gray-900/40">
             <h3 class="font-medium text-sm">Destination account</h3>
             <p class="text-xs text-gray-400 mt-1">Choose where notes and other data will be recreated.</p>
-            <button disabled class="mt-2 px-3 py-1 rounded bg-gray-700 text-gray-400 text-xs cursor-not-allowed">
-              Connect (coming soon)
-            </button>
+            <div class="mt-2 flex items-center gap-2">
+              <button onclick="connectDestination()" class="px-3 py-1 rounded bg-blue-600 text-xs">
+                Connect destination
+              </button>
+              <span id="destinationStatus" class="text-xs text-gray-400"></span>
+            </div>
           </div>
         </div>
       </section>
@@ -84,12 +87,32 @@
         'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes'
       );
     }
+    function connectDestination() {
+      var base = location.hostname.toLowerCase().endsWith('vercel.app')
+        ? ''
+        : 'https://emortoja.vercel.app';
+      var url = base + '/api/google/destination/auth';
+      var w = 480;
+      var h = 640;
+      var left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
+      var top = window.screenY + Math.max(0, (window.outerHeight - h) / 2);
+      window.open(
+        url,
+        'google_destination_connect',
+        'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes'
+      );
+    }
     window.addEventListener('message', function (event) {
       var data = event.data || {};
       if (data.type === 'google-source-connected') {
         var s = document.getElementById('sourceStatus');
         if (s) {
           s.textContent = data.email ? 'Connected as ' + data.email : 'Source connected';
+        }
+      } else if (data.type === 'google-destination-connected') {
+        var d = document.getElementById('destinationStatus');
+        if (d) {
+          d.textContent = data.email ? 'Connected as ' + data.email : 'Destination connected';
         }
       }
     });
