@@ -21,8 +21,8 @@
     <button onclick="downloadContent()" class="bg-green-600 px-4 py-2 rounded">Download Visible Page (HTML)</button>
   </footer>  
 <script>
-const IS_VERCEL = /vercel\.app$/.test(location.hostname);
-const PROXY_BASE = IS_VERCEL ? '/api/proxy' : '';
+const IS_VERCEL = /vercel\.app$/i.test(location.hostname);
+const PROXY_BASE = IS_VERCEL ? '/api/proxy' : 'https://emortoja.vercel.app/api/proxy';
 let lastHtml = null;
 let lastUrl = null;
 
