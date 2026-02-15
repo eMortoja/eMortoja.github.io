@@ -9,6 +9,7 @@ export default async function handler(req, res) {
     return;
   }
   const url = new URL(req.url || '', 'https://emortoja.vercel.app');
+  const state = url.searchParams.get('state') || 'source';
   const error = url.searchParams.get('error');
   if (error) {
     res.statusCode = 400;
@@ -55,10 +56,21 @@ export default async function handler(req, res) {
   res.statusCode = 200;
   res.setHeader('content-type', 'text/html; charset=utf-8');
   const safeEmail = email || '';
+  const type = state === 'destination' ? 'google-destination-connected' : 'google-source-connected';
+  const title =
+    state === 'destination' ? 'Google destination connected' : 'Google source connected';
+  const heading =
+    state === 'destination' ? 'Destination account connected' : 'Source account connected';
   const body =
-    '<!doctype html><html><head><meta charset="utf-8"><title>Google source connected</title></head><body style="font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; padding: 1.5rem; background:#020617; color:#e5e7eb;"><h1 style="font-size:1.25rem; font-weight:600;">Source account connected</h1><p style="margin-top:0.5rem;">' +
+    '<!doctype html><html><head><meta charset="utf-8"><title>' +
+    title +
+    '</title></head><body style="font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; padding: 1.5rem; background:#020617; color:#e5e7eb;"><h1 style="font-size:1.25rem; font-weight:600;">' +
+    heading +
+    '</h1><p style="margin-top:0.5rem;">' +
     (safeEmail ? 'Signed in as ' + safeEmail : 'Sign-in completed.') +
-    '</p><p style="margin-top:0.75rem; font-size:0.875rem;">You can close this window.</p><script>(function(){try{if(window.opener && !window.opener.closed){window.opener.postMessage({type:\"google-source-connected\",email:' +
+    '</p><p style="margin-top:0.75rem; font-size:0.875rem;">You can close this window.</p><script>(function(){try{if(window.opener && !window.opener.closed){window.opener.postMessage({type:' +
+    JSON.stringify(type) +
+    ',email:' +
     JSON.stringify(safeEmail) +
     '},\"*\");}}catch(e){}setTimeout(function(){window.close();},500);}());</script></body></html>';
   res.end(body);

@@ -14,6 +14,7 @@ export default async function handler(req, res) {
   authUrl.searchParams.set('scope', 'openid email profile');
   authUrl.searchParams.set('access_type', 'offline');
   authUrl.searchParams.set('prompt', 'consent');
+  authUrl.searchParams.set('state', 'source');
   res.statusCode = 302;
   res.setHeader('Location', authUrl.toString());
   res.end();
