@@ -10,6 +10,10 @@
   <header class="bg-gray-800 p-4 flex items-center space-x-2">
     <input id="addressBar" type="text" placeholder="Enter URL or search..."
       class="flex-1 px-4 py-2 rounded text-black" />
+    <label class="flex items-center gap-2 text-sm">
+      <input id="snapshotMode" type="checkbox" class="accent-blue-500" />
+      <span class="opacity-90">Snapshot via proxy</span>
+    </label>
     <button onclick="loadPage()" class="bg-blue-600 px-4 py-2 rounded">Go</button>
   </header>  <main class="flex-1">
     <iframe id="browserFrame" src="about:blank" class="w-full h-full"></iframe>
@@ -17,29 +21,65 @@
     <button onclick="downloadContent()" class="bg-green-600 px-4 py-2 rounded">Download Visible Page (HTML)</button>
   </footer>  
 <script>
+const IS_VERCEL = /vercel\.app$/.test(location.hostname);
+const PROXY_BASE = IS_VERCEL ? '/api/proxy' : '';
+let lastHtml = null;
+let lastUrl = null;
+
+function ensureBase(html, url) {
+  if (!/<base\s/i.test(html)) {
+    return html.replace(/<head([^>]*)>/i, `<head$1><base href="${url}">`);
+  }
+  return html;
+}
+
 function loadPage() {
   const input = document.getElementById('addressBar').value.trim();
   const iframe = document.getElementById('browserFrame');
+  const snapshot = document.getElementById('snapshotMode').checked && PROXY_BASE;
 
   if (!input) return;
 
   let url = input;
   if (!url.startsWith('http')) {
-    // DuckDuckGo Lite works in iframe
-    url = 'https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(input);
+    url = 'https://duckduckgo.com/?q=' + encodeURIComponent(input);
   }
 
-  iframe.src = url;
+  lastHtml = null;
+  lastUrl = url;
+  if (snapshot) {
+    const proxied = PROXY_BASE + '?url=' + encodeURIComponent(url);
+    fetch(proxied).then(function (r) {
+      if (!r.ok) throw new Error('proxy');
+      return r.text();
+    }).then(function (html) {
+      lastHtml = ensureBase(html, url);
+      const blob = new Blob([lastHtml], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      iframe.src = blobUrl;
+    }).catch(function () {
+      iframe.src = url;
+    });
+  } else {
+    iframe.src = url;
+  }
 }
      
     function downloadContent() {
       const iframe = document.getElementById('browserFrame');
+      if (lastHtml) {
+        const blob = new Blob([lastHtml], { type: "text/html;charset=utf-8" });
+        saveAs(blob, "page.html");
+        return;
+      }
       try {
-        const html = iframe.contentDocument.documentElement.outerHTML;
+        const doc = iframe.contentDocument;
+        if (!doc) throw new Error('cross-origin');
+        const html = doc.documentElement.outerHTML;
         const blob = new Blob([html], { type: "text/html;charset=utf-8" });
         saveAs(blob, "page.html");
       } catch (e) {
-        alert("Unable to access content. CORS restriction.");
+        alert("Snapshot mode via proxy is required to download this page.");
       }
     }
   </script><script src="./nav.js"></script></body>
