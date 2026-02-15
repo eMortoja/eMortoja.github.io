@@ -15,6 +15,26 @@
         </p>
       </header>
       <section class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+        <h2 class="text-lg font-semibold">Google connections</h2>
+        <p class="text-gray-300 mt-2 text-sm">
+          Connect the source and destination Google accounts you want to move data between.
+        </p>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2 text-sm">
+          <div class="border border-gray-700 rounded p-3 bg-gray-900/40">
+            <p class="text-gray-400">Source</p>
+            <p id="summarySource" class="mt-1 text-gray-200 text-xs">
+              Not connected
+            </p>
+          </div>
+          <div class="border border-gray-700 rounded p-3 bg-gray-900/40">
+            <p class="text-gray-400">Destination</p>
+            <p id="summaryDestination" class="mt-1 text-gray-200 text-xs">
+              Not connected
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
         <h2 class="text-lg font-semibold">Google data transfer (concept)</h2>
         <p class="text-gray-300 mt-2">
           Transferring Google data (like Keep notes) between accounts is only possible
@@ -64,6 +84,23 @@
           (for example on Vercel functions) and wire these controls to it.
         </p>
       </section>
+      <section class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+        <h2 class="text-lg font-semibold">Planned Google tools</h2>
+        <ul class="mt-2 space-y-2 text-sm text-gray-300">
+          <li class="flex items-center justify-between">
+            <span>Drive folder copy (source → destination)</span>
+            <span class="px-2 py-0.5 rounded-full text-xs bg-gray-700 text-gray-200">Planned</span>
+          </li>
+          <li class="flex items-center justify-between">
+            <span>Keep via Takeout → Docs/Drive</span>
+            <span class="px-2 py-0.5 rounded-full text-xs bg-gray-700 text-gray-200">Planned</span>
+          </li>
+          <li class="flex items-center justify-between">
+            <span>Gmail labels / filters sync</span>
+            <span class="px-2 py-0.5 rounded-full text-xs bg-gray-700 text-gray-200">Idea</span>
+          </li>
+        </ul>
+      </section>
     </section>
   </main>
   <footer class="bg-gray-800 p-4 text-center text-gray-300">
@@ -107,12 +144,18 @@
       if (data.type === 'google-source-connected') {
         var s = document.getElementById('sourceStatus');
         if (s) {
-          s.textContent = data.email ? 'Connected as ' + data.email : 'Source connected';
+          var text = data.email ? 'Connected as ' + data.email : 'Source connected';
+          s.textContent = text;
+          var sum = document.getElementById('summarySource');
+          if (sum) sum.textContent = text;
         }
       } else if (data.type === 'google-destination-connected') {
         var d = document.getElementById('destinationStatus');
         if (d) {
-          d.textContent = data.email ? 'Connected as ' + data.email : 'Destination connected';
+          var textD = data.email ? 'Connected as ' + data.email : 'Destination connected';
+          d.textContent = textD;
+          var sumD = document.getElementById('summaryDestination');
+          if (sumD) sumD.textContent = textD;
         }
       }
     });
