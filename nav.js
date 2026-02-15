@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var links = [
     { href: './', label: 'Home' },
     { href: './projects.html', label: 'Projects' },
-    { href: './dashboard.html', label: 'Dashboard' }
+    { href: './dashboard.html', label: 'Dashboard' },
+    { href: './tools.html', label: 'Tools' }
   ];
   var current = location.pathname.replace(/\/+$/, '');
   var leaf = current.split('/').pop() || 'index.html';

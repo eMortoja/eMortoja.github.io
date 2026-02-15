@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tools • eMortoja</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+  <main class="flex-1">
+    <section class="max-w-3xl mx-auto p-6 space-y-6">
+      <header>
+        <h1 class="text-2xl font-semibold">Tools</h1>
+        <p class="text-gray-300 mt-1">
+          Ideas and experiments for moving personal data between accounts.
+        </p>
+      </header>
+      <section class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+        <h2 class="text-lg font-semibold">Google data transfer (concept)</h2>
+        <p class="text-gray-300 mt-2">
+          Transferring Google data (like Keep notes) between accounts is only possible
+          through official Google APIs and export tools. Any solution must respect
+          Google&apos;s Terms of Service and OAuth consent flow.
+        </p>
+        <ul class="list-disc list-inside text-gray-300 mt-3 space-y-1 text-sm">
+          <li>Sign in with source Google account and request read access.</li>
+          <li>Export items via Google APIs or Google Takeout.</li>
+          <li>Sign in with destination account and re-create notes using APIs.</li>
+        </ul>
+        <p class="text-xs text-amber-300 mt-3">
+          This page is a design placeholder. No Google data is accessed or moved here.
+        </p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div class="border border-gray-700 rounded p-3 bg-gray-900/40">
+            <h3 class="font-medium text-sm">Source account</h3>
+            <p class="text-xs text-gray-400 mt-1">Authenticate and list available exports.</p>
+            <button disabled class="mt-2 px-3 py-1 rounded bg-gray-700 text-gray-400 text-xs cursor-not-allowed">
+              Connect (coming soon)
+            </button>
+          </div>
+          <div class="border border-gray-700 rounded p-3 bg-gray-900/40">
+            <h3 class="font-medium text-sm">Destination account</h3>
+            <p class="text-xs text-gray-400 mt-1">Choose where notes and other data will be recreated.</p>
+            <button disabled class="mt-2 px-3 py-1 rounded bg-gray-700 text-gray-400 text-xs cursor-not-allowed">
+              Connect (coming soon)
+            </button>
+          </div>
+        </div>
+      </section>
+      <section class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+        <h2 class="text-lg font-semibold">Planned architecture</h2>
+        <ol class="list-decimal list-inside text-gray-300 mt-2 space-y-1 text-sm">
+          <li>Backend service (not on GitHub Pages) hosts OAuth flows and talks to Google APIs.</li>
+          <li>Frontend (this site) only initiates flows and shows progress.</li>
+          <li>All access tokens are stored server-side; the browser never sees secrets.</li>
+        </ol>
+        <p class="text-xs text-gray-400 mt-3">
+          When you are ready to build this for real, we will add a secure backend
+          (for example on Vercel functions) and wire these controls to it.
+        </p>
+      </section>
+    </section>
+  </main>
+  <footer class="bg-gray-800 p-4 text-center text-gray-300">
+    <p>© <span id="year"></span> eMortoja</p>
+  </footer>
+  <script>
+    var y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+  </script>
+  <script src="./nav.js"></script>
+</body>
+</html>
