@@ -43,6 +43,7 @@ export default async function handler(req, res) {
   }
   const tokenJson = await tokenResp.json();
   const accessToken = tokenJson.access_token;
+  const refreshToken = tokenJson.refresh_token || '';
   let email = '';
   if (accessToken) {
     const userResp = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
@@ -56,6 +57,23 @@ export default async function handler(req, res) {
   res.statusCode = 200;
   res.setHeader('content-type', 'text/html; charset=utf-8');
   const safeEmail = email || '';
+  const cookies = [];
+  if (refreshToken && safeEmail) {
+    const payload = Buffer.from(
+      JSON.stringify({ refresh_token: refreshToken, email: safeEmail }),
+      'utf8'
+    ).toString('base64url');
+    const name = state === 'destination' ? 'g_dest' : 'g_src';
+    cookies.push(
+      name +
+        '=' +
+        encodeURIComponent(payload) +
+        '; Path=/; HttpOnly; Secure; SameSite=Lax'
+    );
+  }
+  if (cookies.length) {
+    res.setHeader('Set-Cookie', cookies);
+  }
   const type = state === 'destination' ? 'google-destination-connected' : 'google-source-connected';
   const title =
     state === 'destination' ? 'Google destination connected' : 'Google source connected';

@@ -11,7 +11,16 @@ export default async function handler(req, res) {
   authUrl.searchParams.set('client_id', clientId);
   authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('scope', 'openid email profile');
+  authUrl.searchParams.set(
+    'scope',
+    [
+      'openid',
+      'email',
+      'profile',
+      'https://www.googleapis.com/auth/contacts',
+      'https://www.googleapis.com/auth/calendar'
+    ].join(' ')
+  );
   authUrl.searchParams.set('access_type', 'offline');
   authUrl.searchParams.set('prompt', 'consent');
   authUrl.searchParams.set('state', 'destination');

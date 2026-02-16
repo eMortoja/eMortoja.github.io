@@ -73,6 +73,47 @@
         </div>
       </section>
       <section class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+        <h2 class="text-lg font-semibold">Sync now (beta)</h2>
+        <p class="text-gray-300 mt-2 text-sm">
+          Copies data from the connected source account into the destination account.
+        </p>
+        <div class="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
+          <div class="border border-gray-700 rounded p-3 bg-gray-900/40 flex flex-col gap-2">
+            <div class="font-medium text-sm">Contacts</div>
+            <button
+              id="btnContacts"
+              onclick="syncContacts()"
+              class="px-3 py-1 rounded bg-emerald-600 text-xs"
+            >
+              Sync contacts
+            </button>
+            <div id="statusContacts" class="text-xs text-gray-400 min-h-[1.5rem]"></div>
+          </div>
+          <div class="border border-gray-700 rounded p-3 bg-gray-900/40 flex flex-col gap-2">
+            <div class="font-medium text-sm">Calendar</div>
+            <button
+              id="btnCalendar"
+              onclick="syncCalendar()"
+              class="px-3 py-1 rounded bg-sky-600 text-xs"
+            >
+              Sync calendar
+            </button>
+            <div id="statusCalendar" class="text-xs text-gray-400 min-h-[1.5rem]"></div>
+          </div>
+          <div class="border border-gray-700 rounded p-3 bg-gray-900/40 flex flex-col gap-2">
+            <div class="font-medium text-sm">Maps</div>
+            <button
+              id="btnMaps"
+              onclick="syncMaps()"
+              class="px-3 py-1 rounded bg-indigo-600 text-xs"
+            >
+              Sync maps
+            </button>
+            <div id="statusMaps" class="text-xs text-gray-400 min-h-[1.5rem]"></div>
+          </div>
+        </div>
+      </section>
+      <section class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
         <h2 class="text-lg font-semibold">Planned architecture</h2>
         <ol class="list-decimal list-inside text-gray-300 mt-2 space-y-1 text-sm">
           <li>Backend service (not on GitHub Pages) hosts OAuth flows and talks to Google APIs.</li>
@@ -109,11 +150,13 @@
   <script>
     var y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
-    function connectSource() {
-      var base = location.hostname.toLowerCase().endsWith('vercel.app')
+    function apiBase() {
+      return location.hostname.toLowerCase().endsWith('vercel.app')
         ? ''
         : 'https://emortoja.vercel.app';
-      var url = base + '/api/google/source/auth';
+    }
+    function connectSource() {
+      var url = apiBase() + '/api/google/source/auth';
       var w = 480;
       var h = 640;
       var left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
@@ -125,10 +168,7 @@
       );
     }
     function connectDestination() {
-      var base = location.hostname.toLowerCase().endsWith('vercel.app')
-        ? ''
-        : 'https://emortoja.vercel.app';
-      var url = base + '/api/google/destination/auth';
+      var url = apiBase() + '/api/google/destination/auth';
       var w = 480;
       var h = 640;
       var left = window.screenX + Math.max(0, (window.outerWidth - w) / 2);
@@ -159,6 +199,124 @@
         }
       }
     });
+    function ensureConnected() {
+      var s = document.getElementById('summarySource');
+      var d = document.getElementById('summaryDestination');
+      if (!s || !d) return false;
+      var st = (s.textContent || '').toLowerCase();
+      var dt = (d.textContent || '').toLowerCase();
+      if (!st || st.indexOf('not connected') !== -1) {
+        alert('Connect a source Google account first.');
+        return false;
+      }
+      if (!dt || dt.indexOf('not connected') !== -1) {
+        alert('Connect a destination Google account first.');
+        return false;
+      }
+      return true;
+    }
+    function syncContacts() {
+      if (!ensureConnected()) return;
+      var el = document.getElementById('statusContacts');
+      var btn = document.getElementById('btnContacts');
+      if (el) el.textContent = 'Syncing contacts...';
+      if (btn) btn.disabled = true;
+      fetch(apiBase() + '/api/google/sync/contacts', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' }
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (!el) return;
+          if (data.error) {
+            el.textContent = 'Error: ' + data.error;
+          } else {
+            el.textContent =
+              'Copied ' +
+              data.created +
+              ' contacts, skipped ' +
+              data.skipped +
+              ' (source ' +
+              data.sourceCount +
+              ', destination ' +
+              data.destinationCount +
+              ').';
+          }
+        })
+        .catch(function () {
+          if (el) el.textContent = 'Network error while syncing contacts.';
+        })
+        .finally(function () {
+          if (btn) btn.disabled = false;
+        });
+    }
+    function syncCalendar() {
+      if (!ensureConnected()) return;
+      var el = document.getElementById('statusCalendar');
+      var btn = document.getElementById('btnCalendar');
+      if (el) el.textContent = 'Syncing calendar events...';
+      if (btn) btn.disabled = true;
+      fetch(apiBase() + '/api/google/sync/calendar', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' }
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (!el) return;
+          if (data.error) {
+            el.textContent = 'Error: ' + data.error;
+          } else {
+            el.textContent =
+              'Copied ' +
+              data.created +
+              ' events, skipped ' +
+              data.skipped +
+              ' (source ' +
+              data.sourceCount +
+              ', destination ' +
+              data.destinationCount +
+              ').';
+          }
+        })
+        .catch(function () {
+          if (el) el.textContent = 'Network error while syncing calendar.';
+        })
+        .finally(function () {
+          if (btn) btn.disabled = false;
+        });
+    }
+    function syncMaps() {
+      if (!ensureConnected()) return;
+      var el = document.getElementById('statusMaps');
+      var btn = document.getElementById('btnMaps');
+      if (el) el.textContent = 'Checking maps support...';
+      if (btn) btn.disabled = true;
+      fetch(apiBase() + '/api/google/sync/maps', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' }
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (!el) return;
+          if (data.error) {
+            el.textContent = data.error + (data.details ? ' ' + data.details : '');
+          } else {
+            el.textContent = 'Maps sync completed.';
+          }
+        })
+        .catch(function () {
+          if (el) el.textContent = 'Network error while checking maps.';
+        })
+        .finally(function () {
+          if (btn) btn.disabled = false;
+        });
+    }
   </script>
   <script src="./nav.js"></script>
 </body>
