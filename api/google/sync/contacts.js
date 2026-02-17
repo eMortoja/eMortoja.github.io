@@ -91,7 +91,10 @@ export default async function handler(req, res) {
       const resp = await fetch(url.toString(), {
         headers: { authorization: 'Bearer ' + accessToken }
       });
-      if (!resp.ok) break;
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error('people_connections ' + resp.status + ' ' + text);
+      }
       const json = await resp.json();
       const people = json.connections || [];
       for (let i = 0; i < people.length; i++) {
@@ -112,15 +115,84 @@ export default async function handler(req, res) {
     }
     return out;
   }
+  async function listOtherContacts(accessToken) {
+    const out = [];
+    let pageToken = '';
+    let guard = 0;
+    while (guard < 5) {
+      guard += 1;
+      const url = new URL('https://people.googleapis.com/v1/otherContacts');
+      url.searchParams.set('readMask', 'names,emailAddresses');
+      url.searchParams.set('pageSize', '500');
+      if (pageToken) url.searchParams.set('pageToken', pageToken);
+      const resp = await fetch(url.toString(), {
+        headers: { authorization: 'Bearer ' + accessToken }
+      });
+      if (!resp.ok) break;
+      const json = await resp.json();
+      const people = json.otherContacts || [];
+      for (let i = 0; i < people.length; i++) {
+        const p = people[i];
+        const emails = (p.emailAddresses || []).map(function (e) {
+          return (e.value || '').toLowerCase();
+        });
+        const names = (p.names || []).map(function (n) {
+          return n.displayName || '';
+        });
+        if (!emails.length) continue;
+        out.push({ emails: emails, names: names });
+        if (out.length >= 2000) break;
+      }
+      if (out.length >= 2000) break;
+      pageToken = json.nextPageToken || '';
+      if (!pageToken) break;
+    }
+    return out;
+  }
+  async function listAllContacts(accessToken) {
+    const base = await listConnections(accessToken);
+    let extra = [];
+    try {
+      extra = await listOtherContacts(accessToken);
+    } catch (e) {
+      extra = [];
+    }
+    if (!extra.length) return base;
+    const seen = new Set();
+    const out = [];
+    for (let i = 0; i < base.length; i++) {
+      const c = base[i];
+      const key = (c.emails && c.emails[0]) || '';
+      if (!key) continue;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(c);
+    }
+    for (let j = 0; j < extra.length; j++) {
+      const c2 = extra[j];
+      const key2 = (c2.emails && c2.emails[0]) || '';
+      if (!key2) continue;
+      if (seen.has(key2)) continue;
+      seen.add(key2);
+      out.push(c2);
+      if (out.length >= 2000) break;
+    }
+    return out;
+  }
   let srcContacts;
   let destContacts;
   try {
-    srcContacts = await listConnections(srcAccess);
-    destContacts = await listConnections(destAccess);
+    srcContacts = await listAllContacts(srcAccess);
+    destContacts = await listAllContacts(destAccess);
   } catch (e) {
     res.statusCode = 502;
     res.setHeader('content-type', 'application/json; charset=utf-8');
-    res.end(JSON.stringify({ error: 'Failed to list contacts' }));
+    res.end(
+      JSON.stringify({
+        error: 'Failed to list contacts',
+        detail: e && e.message ? e.message : String(e)
+      })
+    );
     return;
   }
   const destEmailSet = new Set();
@@ -178,4 +250,3 @@ export default async function handler(req, res) {
     })
   );
 }
-

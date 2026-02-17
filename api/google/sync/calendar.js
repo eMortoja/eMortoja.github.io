@@ -76,47 +76,101 @@ export default async function handler(req, res) {
     res.end(JSON.stringify({ error: 'Failed to refresh access tokens' }));
     return;
   }
-  const nowIso = new Date().toISOString();
-  async function listEvents(accessToken) {
+  const now = Date.now();
+  const timeMinIso = new Date(now - 365 * 24 * 60 * 60 * 1000).toISOString();
+  const timeMaxIso = new Date(now + 365 * 24 * 60 * 60 * 1000).toISOString();
+  async function listCalendarIds(accessToken) {
+    const url = new URL(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList'
+    );
+    const resp = await fetch(url.toString(), {
+      headers: { authorization: 'Bearer ' + accessToken }
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error('calendar_list ' + resp.status + ' ' + text);
+    }
+    const json = await resp.json();
+    const items = json.items || [];
+    const out = [];
+    for (let i = 0; i < items.length; i++) {
+      const cal = items[i];
+      if (!cal || !cal.id) continue;
+      const role = cal.accessRole || '';
+      if (role === 'owner' || role === 'writer') {
+        out.push(cal.id);
+      }
+    }
+    if (!out.length) out.push('primary');
+    return out;
+  }
+  async function listEventsForCalendar(accessToken, calendarId) {
     const events = [];
     let pageToken = '';
     let guard = 0;
     while (guard < 5) {
       guard += 1;
       const url = new URL(
-        'https://www.googleapis.com/calendar/v3/calendars/primary/events'
+        'https://www.googleapis.com/calendar/v3/calendars/' +
+          encodeURIComponent(calendarId) +
+          '/events'
       );
       url.searchParams.set('singleEvents', 'true');
       url.searchParams.set('orderBy', 'startTime');
-      url.searchParams.set('timeMin', nowIso);
+      url.searchParams.set('timeMin', timeMinIso);
+      url.searchParams.set('timeMax', timeMaxIso);
       url.searchParams.set('maxResults', '500');
       if (pageToken) url.searchParams.set('pageToken', pageToken);
       const resp = await fetch(url.toString(), {
         headers: { authorization: 'Bearer ' + accessToken }
       });
-      if (!resp.ok) break;
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(
+          'calendar_events ' + calendarId + ' ' + resp.status + ' ' + text
+        );
+      }
       const json = await resp.json();
       const items = json.items || [];
       for (let i = 0; i < items.length; i++) {
         const ev = items[i];
         events.push(ev);
-        if (events.length >= 1000) break;
+        if (events.length >= 2000) break;
       }
-      if (events.length >= 1000) break;
+      if (events.length >= 2000) break;
       pageToken = json.nextPageToken || '';
       if (!pageToken) break;
     }
     return events;
   }
+  async function listAllEvents(accessToken) {
+    const calendars = await listCalendarIds(accessToken);
+    const all = [];
+    for (let i = 0; i < calendars.length; i++) {
+      const id = calendars[i];
+      const evs = await listEventsForCalendar(accessToken, id);
+      for (let j = 0; j < evs.length; j++) {
+        all.push(evs[j]);
+        if (all.length >= 4000) break;
+      }
+      if (all.length >= 4000) break;
+    }
+    return all;
+  }
   let srcEvents;
   let destEvents;
   try {
-    srcEvents = await listEvents(srcAccess);
-    destEvents = await listEvents(destAccess);
+    srcEvents = await listAllEvents(srcAccess);
+    destEvents = await listAllEvents(destAccess);
   } catch (e) {
     res.statusCode = 502;
     res.setHeader('content-type', 'application/json; charset=utf-8');
-    res.end(JSON.stringify({ error: 'Failed to list calendar events' }));
+    res.end(
+      JSON.stringify({
+        error: 'Failed to list calendar events',
+        detail: e && e.message ? e.message : String(e)
+      })
+    );
     return;
   }
   function eventKey(ev) {
@@ -179,4 +233,3 @@ export default async function handler(req, res) {
     })
   );
 }
-
